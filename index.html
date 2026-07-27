@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Settings</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --bg: #F7F6F2;
+    --panel: #FFFFFF;
+    --ink: #1C1B19;
+    --ink-soft: #6E6C66;
+    --line: #E4E1D9;
+    --accent: #1F5F5B;
+    --accent-soft: #E4EFEE;
+    --danger: #B5482F;
+    --danger-soft: #F7E9E4;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .app{
+    display:grid;
+    grid-template-columns:220px 1fr;
+    max-width:920px;
+    margin:0 auto;
+    min-height:100vh;
+  }
+
+  /* status strip */
+  .status-strip{
+    grid-column:1 / -1;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 28px;
+    border-bottom:1px solid var(--line);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.02em;
+    color:var(--ink-soft);
+  }
+  .status-strip .dot{
+    display:inline-block;
+    width:6px;height:6px;
+    border-radius:50%;
+    background:var(--accent);
+    margin-right:8px;
+    transition:background .2s ease;
+  }
+  .status-strip.dirty .dot{ background:var(--danger); }
+  .status-strip .save-btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    padding:7px 14px;
+    border-radius:3px;
+    cursor:pointer;
+    opacity:0.35;
+    pointer-events:none;
+    transition:opacity .15s ease;
+  }
+  .status-strip.dirty .save-btn{
+    opacity:1;
+    pointer-events:auto;
+  }
+  .status-strip .save-btn:hover{ background:#000; }
+
+  /* nav */
+  nav{
+    border-right:1px solid var(--line);
+    padding:24px 0;
+  }
+  nav .label{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:15px;
+    padding:0 24px 20px;
+    letter-spacing:-0.01em;
+  }
+  nav button{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:100%;
+    text-align:left;
+    background:none;
+    border:none;
+    padding:11px 24px;
+    font-family:'Inter', sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    color:var(--ink-soft);
+    cursor:pointer;
+    border-left:2px solid transparent;
+    transition:all .12s ease;
+  }
+  nav button .idx{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    color:#B5B2A8;
+    width:14px;
+  }
+  nav button:hover{ color:var(--ink); background:#F1EFE9; }
+  nav button.active{
+    color:var(--ink);
+    border-left-color:var(--accent);
+    background:var(--accent-soft);
+  }
+  nav button.active .idx{ color:var(--accent); }
+
+  /* main */
+  main{ padding:32px 36px 60px; }
+  .section-head{ margin-bottom:26px; }
+  .section-head h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:22px;
+    margin:0 0 6px;
+    letter-spacing:-0.01em;
+  }
+  .section-head p{
+    margin:0;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    line-height:1.5;
+  }
+
+  .field-group{
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:var(--panel);
+    margin-bottom:18px;
+    overflow:hidden;
+  }
+  .field{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding:16px 18px;
+  }
+  .field + .field{ border-top:1px solid var(--line); }
+  .field-text .name{ font-size:13.5px; font-weight:600; margin-bottom:3px; }
+  .field-text .desc{ font-size:12.5px; color:var(--ink-soft); line-height:1.45; max-width:360px; }
+
+  input[type=text], input[type=email], select{
+    font-family:'Inter', sans-serif;
+    font-size:13.5px;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:#FBFAF7;
+    color:var(--ink);
+    width:220px;
+  }
+  input[type=text]:focus, input[type=email]:focus, select:focus{
+    outline:none;
+    border-color:var(--accent);
+    background:#fff;
+  }
+
+  /* toggle */
+  .toggle{
+    position:relative;
+    width:38px; height:22px;
+    flex-shrink:0;
+    border-radius:11px;
+    background:#DAD7CC;
+    cursor:pointer;
+    border:none;
+    transition:background .15s ease;
+  }
+  .toggle::after{
+    content:'';
+    position:absolute;
+    top:2px; left:2px;
+    width:18px; height:18px;
+    border-radius:50%;
+    background:#fff;
+    transition:transform .15s ease;
+    box-shadow:0 1px 2px rgba(0,0,0,0.2);
+  }
+  .toggle.on{ background:var(--accent); }
+  .toggle.on::after{ transform:translateX(16px); }
+
+  /* radio cards for appearance */
+  .swatch-row{ display:flex; gap:10px; padding:16px 18px; }
+  .swatch{
+    flex:1;
+    border:1.5px solid var(--line);
+    border-radius:6px;
+    padding:12px;
+    cursor:pointer;
+    text-align:center;
+    font-size:12px;
+    font-weight:500;
+    color:var(--ink-soft);
+    transition:all .12s ease;
+  }
+  .swatch .preview{
+    height:34px;
+    border-radius:4px;
+    margin-bottom:8px;
+    border:1px solid var(--line);
+  }
+  .swatch.selected{
+    border-color:var(--accent);
+    color:var(--ink);
+    background:var(--accent-soft);
+  }
+
+  .danger-zone{
+    border:1px solid #EBD3C8;
+    background:var(--danger-soft);
+    border-radius:6px;
+    padding:16px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+  }
+  .danger-zone .name{ font-size:13.5px; font-weight:600; color:var(--danger); margin-bottom:3px; }
+  .danger-zone .desc{ font-size:12.5px; color:#8C5A47; max-width:340px; line-height:1.45; }
+  .danger-zone button{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    background:transparent;
+    color:var(--danger);
+    border:1px solid var(--danger);
+    padding:8px 13px;
+    border-radius:4px;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:all .12s ease;
+  }
+  .danger-zone button:hover{ background:var(--danger); color:#fff; }
+
+  .section{ display:none; }
+  .section.active{ display:block; animation:fade .18s ease; }
+  @keyframes fade{ from{opacity:0; transform:translateY(3px);} to{opacity:1; transform:translateY(0);} }
+
+  @media (max-width:640px){
+    .app{ grid-template-columns:1fr; }
+    nav{ display:flex; overflow-x:auto; border-right:none; border-bottom:1px solid var(--line); padding:12px 0; }
+    nav .label{ display:none; }
+    nav button{ white-space:nowrap; border-left:none; border-bottom:2px solid transparent; }
+    nav button.active{ border-bottom-color:var(--accent); }
+    .field{ flex-direction:column; align-items:flex-start; }
+    input[type=text], input[type=email], select{ width:100%; }
+  }
+
+  button:focus-visible, .toggle:focus-visible, .swatch:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="status-strip" id="statusStrip">
+    <span><span class="dot"></span><span id="statusText">All changes saved</span></span>
+    <button class="save-btn" id="saveBtn">Save changes</button>
+  </div>
+
+  <nav>
+    <div class="label">Settings</div>
+    <button class="nav-item active" data-section="account"><span class="idx">01</span> Account</button>
+    <button class="nav-item" data-section="notifications"><span class="idx">02</span> Notifications</button>
+    <button class="nav-item" data-section="appearance"><span class="idx">03</span> Appearance</button>
+    <button class="nav-item" data-section="privacy"><span class="idx">04</span> Privacy</button>
+    <button class="nav-item" data-section="danger"><span class="idx">05</span> Danger zone</button>
+  </nav>
+
+  <main>
+
+    <section class="section active" id="account">
+      <div class="section-head">
+        <h1>Account</h1>
+        <p>Your basic profile details, used across the app.</p>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <div class="field-text"><div class="name">Display name</div><div class="desc">Shown to other people on your team.</div></div>
+          <input type="text" value="Sevinc" />
+        </div>
+        <div class="field">
+          <div class="field-text"><div class="name">Email address</div><div class="desc">Used for sign-in and important account notices.</div></div>
+          <input type="email" value="sevinc@example.com" />
+        </div>
+        <div class="field">
+          <div class="field-text"><div class="name">Language</div><div class="desc">Sets the language for menus and messages.</div></div>
+          <select>
+            <option>English</option>
+            <option>Azərbaycan dili</option>
+            <option>Türkçe</option>
+            <option>Русский</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="notifications">
+      <div class="section-head">
+        <h1>Notifications</h1>
+        <p>Choose what you hear about, and where.</p>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <div class="field-text"><div class="name">Email digest</div><div class="desc">A weekly summary of activity you might have missed.</div></div>
+          <button class="toggle on" data-key="digest"></button>
+        </div>
+        <div class="field">
+          <div class="field-text"><div class="name">Comment replies</div><div class="desc">Notify me when someone replies to my comment.</div></div>
+          <button class="toggle on" data-key="replies"></button>
+        </div>
+        <div class="field">
+          <div class="field-text"><div class="name">Product updates</div><div class="desc">Occasional notes about new features.</div></div>
+          <button class="toggle" data-key="updates"></button>
+        </div>
+        <div class="field">
+          <div class="field-text"><div class="name">Push notifications</div><div class="desc">Real-time alerts on this device.</div></div>
+          <button class="toggle on" data-key="push"></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="appearance">
+      <div class="section-head">
+        <h1>Appearance</h1>
+        <p>How the app looks on this device.</p>
+      </div>
+      <div class="field-group">
+        <div class="field" style="padding-bottom:0;">
+          <div class="field-text"><div class="name">Theme</div><div class="desc">Applies immediately, no need to save.</div></div>
+        </div>
+        <div class="swatch-row">
+          <div class="swatch selected" data-theme="light">
+            <div class="preview" style="background:#F7F6F2;"></div>
+            Light
+          </div>
+          <div class="swatch" data-theme="dark">
+            <div class="preview" style="background:#1C1B19;"></div>
+            Dark
+          </div>
+          <div class="swatch" data-theme="system">
+            <div class="preview" style="background:linear-gradient(90deg,#F7F6F2 50%,#1C1B19 50%);"></div>
+            System
+          </div>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <div class="field-text"><div class="name">Compact layout</div><div class="desc">Reduce spacing to fit more on screen.</div></div>
+          <button class="toggle" data-key="compact"></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="privacy">
+      <div class="section-head">
+        <h1>Privacy</h1>
+        <p>Control what's visible to others and what's collected.</p>
+      </div>
+      <div class="field-group">
+        <div class="field">
+          <div class="field-text"><div class="name">Show online status</div><div class="desc">Let others see when you're active.</div></div>
+          <button class="toggle on" data-key="online"></button>
+        </div>
+        <div class="field">
+          <div class="field-text"><div class="name">Usage analytics</div><div class="desc">Help improve the app by sharing anonymous usage data.</div></div>
+          <button class="toggle on" data-key="analytics"></button>
+        </div>
+        <div class="field">
+          <div class="field-text"><div class="name">Two-factor authentication</div><div class="desc">Require a code at sign-in, in addition to your password.</div></div>
+          <button class="toggle" data-key="twofa"></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="danger">
+      <div class="section-head">
+        <h1>Danger zone</h1>
+        <p>These actions are difficult or impossible to undo.</p>
+      </div>
+      <div class="danger-zone">
+        <div>
+          <div class="name">Delete account</div>
+          <div class="desc">Permanently removes your account and all associated data.</div>
+        </div>
+        <button>Delete account</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const navButtons = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('.section');
+  navButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      navButtons.forEach(b => b.classList.remove('active'));
+      sections.forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.section).classList.add('active');
+    });
+  });
+
+  const statusStrip = document.getElementById('statusStrip');
+  const statusText = document.getElementById('statusText');
+  const saveBtn = document.getElementById('saveBtn');
+
+  function markDirty(){
+    statusStrip.classList.add('dirty');
+    statusText.textContent = 'Unsaved changes';
+  }
+
+  document.querySelectorAll('.toggle').forEach(t => {
+    t.addEventListener('click', () => {
+      t.classList.toggle('on');
+      markDirty();
+    });
+  });
+
+  document.querySelectorAll('input, select').forEach(el => {
+    el.addEventListener('input', markDirty);
+    el.addEventListener('change', markDirty);
+  });
+
+  document.querySelectorAll('.swatch').forEach(s => {
+    s.addEventListener('click', () => {
+      document.querySelectorAll('.swatch').forEach(x => x.classList.remove('selected'));
+      s.classList.add('selected');
+      markDirty();
+    });
+  });
+
+  saveBtn.addEventListener('click', () => {
+    statusStrip.classList.remove('dirty');
+    statusText.textContent = 'All changes saved';
+  });
+</script>
+
+</body>
+</html>
